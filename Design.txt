@@ -1,0 +1,38 @@
+Hangman Game Design Reflections
+
+
+- What additional properties did you add to your models and why?
+USER model: I added wins, played, and percent_won. These helped me to 
+achieve the user_rankings endpoint requirement. I first tried (many hours) to 
+dynamically calculate these values and post back, but failed. Much easier once
+I switched to editing the model.
+
+GAME model: I added bad_guesses, good_guesses, status, misses_remaining, and history.
+Most of these were specific to Hangman and made sense for that. To make 
+available the bad/good guesses allowed for displaying what was played and how
+the target word spaces looked as a status. The misses_remaining would allow for
+an endpoint user to display a visual stick man. I figured 6 body parts, therefore
+6 misses allowed.
+
+The history property made the last get_game_history endpoint requirement workable.
+
+SCORE model: I added misses. This was necessary to achieve the get_high_scores 
+endpoint. 
+
+
+- What were some of the trade-offs or struggles you faced when implementing 
+the new game logic?
+Luckily, I think Hangman closely follows the skeleton project that was provided.
+That part was great, but the hard part was adapting a game I developed to work
+via command line interface returning immediate feedback to a game that stored
+and then pulled data. Definitely a different way to think about things. Google
+App Engine is a different animal entirely. 
+
+I wanted to make sure the user always saw the game board (or letter spaces)
+and what was already played. This drove how I adjusted the models above. Once I
+did that, the rest was trying to figure out all the required endpoints. 
+
+Overall, this project required much more Python understanding than any of the
+other projects. I had originally started the Conference app project early last
+Fall, was stumped, and then went away to learn more Python. I did the full
+Treehouse track on Python (many, many hours) in preparation. 
