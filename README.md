@@ -65,14 +65,14 @@ path parameter `urlsafe_game_key`.
     - Returns: GameHistoryForm with games plays made.
     - Description: Returns play history of specific game.
     
- - **get_scores**
+- **get_scores**
     - Path: 'scores'
     - Method: GET
     - Parameters: None
     - Returns: ScoreForms.
     - Description: Returns all Scores in the database (unordered).
     
- - **get_user_scores**
+- **get_user_scores**
     - Path: 'scores/user/{user_name}'
     - Method: GET
     - Parameters: user_name
@@ -80,14 +80,14 @@ path parameter `urlsafe_game_key`.
     - Description: Returns all Scores recorded by the provided player (unordered).
     Will raise a NotFoundException if the User does not exist.
     
- - **get_high_scores**
+- **get_high_scores**
     - Path: 'scores/highest'
     - Method: GET
     - Parameters: number_of_results (optional, defaults to 5 max)
     - Returns: ScoreForms sorted by least misses first.
     - Description: Returns up to top 5 scores ranked by least misses first.
 
- - **get_user_rankings**
+- **get_user_rankings**
     - Path: 'rankings'
     - Method: GET
     - Parameters: None
@@ -95,14 +95,14 @@ path parameter `urlsafe_game_key`.
     - Description: Returns User rankings by wins/games_played, sorted by best percentage
     first.
 
- - **get_user_games**
+- **get_user_games**
     - Path: 'games/user/{user_name}'
     - Method: GET
     - Parameters: user_name
     - Returns: GameForms filtered for specific user.
     - Description: Returns all of an individual User's active games.
 
- - **cancel_game**
+- **cancel_game**
     - Path: 'games/cancel/{urlsafe_game_key}'
     - Method: PUT
     - Parameters: urlsafe_game_key
