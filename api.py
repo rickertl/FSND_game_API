@@ -86,11 +86,6 @@ class HangmanApi(remote.Service):
         if game.game_over:
             return game.to_form('Game already over!')
 
-        def winner():
-            game.end_game(True)
-            game.history.append('guess: ' + guess + ', result: win')
-            return game.to_form('You win! The word was {}.'.format(game.
-                                                                   target))
         # check if input OK to make game play
         if guess == game.target:
             got_word = True
