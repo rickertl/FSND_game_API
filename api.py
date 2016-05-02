@@ -6,8 +6,6 @@ __author__ = "Rick Ertl"
 import logging
 import endpoints
 from protorpc import remote, messages
-from google.appengine.api import memcache
-from google.appengine.api import taskqueue
 
 from models import User, Game, Score
 from models import StringMessage, NewGameForm, GameForm, MakeMoveForm,\
@@ -19,8 +17,6 @@ GET_GAME_REQUEST = endpoints.ResourceContainer(
     urlsafe_game_key=messages.StringField(1),)
 MAKE_MOVE_REQUEST = endpoints.ResourceContainer(
     MakeMoveForm,
-    urlsafe_game_key=messages.StringField(1),)
-GAME_HISTORY_REQUEST = endpoints.ResourceContainer(
     urlsafe_game_key=messages.StringField(1),)
 USER_REQUEST = endpoints.ResourceContainer(user_name=messages.StringField(1),
                                            email=messages.StringField(2))
@@ -60,10 +56,6 @@ class HangmanApi(remote.Service):
                 'A User with that name does not exist!')
         game = Game.new_game(user.key)
 
-        # Use a task queue to update the average attempts remaining.
-        # This operation is not needed to complete the creation of a new game
-        # so it is performed out of sequence.
-        # taskqueue.add(url='/tasks/cache_average_attempts')
         # create initial output of hangman board
         return game.to_form('Good luck playing Hangman!')
 
@@ -89,13 +81,21 @@ class HangmanApi(remote.Service):
         """Makes a move. Returns a game state with message"""
         game = get_by_urlsafe(request.urlsafe_game_key, Game)
         guess = request.guess.lower()
+        got_word = False
 
         if game.game_over:
             return game.to_form('Game already over!')
 
+        def winner():
+            game.end_game(True)
+            game.history.append('guess: ' + guess + ', result: win')
+            return game.to_form('You win! The word was {}.'.format(game.
+                                                                   target))
         # check if input OK to make game play
-        if len(guess) != 1:
-            return game.to_form("You can only guess a single letter.")
+        if guess == game.target:
+            got_word = True
+        elif len(guess) != 1:
+            return game.to_form("You can only guess a single letter or the whole word.")
         elif guess in game.bad_guesses or guess in game.good_guesses:
             return game.to_form("You've already guessed that letter.")
         elif not guess.isalpha():
@@ -105,17 +105,19 @@ class HangmanApi(remote.Service):
         def board():
             status_list = []
             for letter in game.target:
-                if letter in game.good_guesses:
+                if got_word:
+                    status_list.append(letter)
+                elif letter in game.good_guesses:
                     status_list.append(letter)
                 else:
                     status_list.append('_')
             game.status = ' '.join(status_list)
 
         # play letter input
-        if guess in game.target:
+        if guess in game.target or got_word:
             game.good_guesses.append(guess)
             board()
-            if len(game.good_guesses) == len(''.join(set(game.target))):
+            if len(game.good_guesses) == len(''.join(set(game.target))) or got_word:
                 game.end_game(True)
                 game.history.append('guess: ' + guess + ', result: win')
                 return game.to_form('You win! The word was {}.'.format(game.
@@ -139,7 +141,7 @@ class HangmanApi(remote.Service):
             game.put()
             return game.to_form(msg)
 
-    @endpoints.method(request_message=GAME_HISTORY_REQUEST,
+    @endpoints.method(request_message=GET_GAME_REQUEST,
                       response_message=GameHistoryForm,
                       path='game/history/{urlsafe_game_key}',
                       name='get_game_history',
@@ -221,7 +223,7 @@ class HangmanApi(remote.Service):
                       response_message=StringMessage,
                       path='game/cancel/{urlsafe_game_key}',
                       name='cancel_game',
-                      http_method='PUT')
+                      http_method='DELETE')
     def cancel_game(self, request):
         """Task 3b: Users can cancel a game. Completed games not included."""
         game = get_by_urlsafe(request.urlsafe_game_key, Game)

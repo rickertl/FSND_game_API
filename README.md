@@ -16,7 +16,12 @@ Hangman is a guessing game. Each game begins with a random 'target' word with
 endpoint which will reply with either: 'good guess', 'bad guess', 'you win', or 'you lose'
 (if the maximum number of attempts is reached). Many different Hangman games can be played 
 by many different Users at any given time. Each game can be retrieved or played by using the 
-path parameter `urlsafe_game_key`.
+path parameter `urlsafe_game_key`. 
+
+##Scoring Description:
+Scoring for this game is done by counting the number of missed guesses. Ideally you want to
+not have any missed guesses to have the highest score possible. The worst score would be
+6 (and you hung your man).
 
 ##Files Included:
  - api.py: Contains endpoints and game playing logic.
@@ -104,7 +109,7 @@ path parameter `urlsafe_game_key`.
 
 - **cancel_game**
     - Path: 'games/cancel/{urlsafe_game_key}'
-    - Method: PUT
+    - Method: DELETE
     - Parameters: urlsafe_game_key
     - Returns: Message confirming deletion of game.
     - Description: Users can cancel a game. Completed games not included.
